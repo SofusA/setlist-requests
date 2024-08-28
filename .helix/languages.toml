@@ -1,0 +1,3 @@
+[[language]]
+name = "rust"
+formatter = { command = "leptosfmt ", args = ["--stdin --rustfmt --override-macro-names html"] }
