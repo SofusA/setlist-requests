@@ -25,9 +25,5 @@ async fn main() {
 }
 
 async fn keys() -> View {
-    html! {
-        <div class="flex justify-center w-full">
-                hello
-            </div>
-    }
+    html! { <div class="flex flex justify-center w-full">hello</div> }
 }
