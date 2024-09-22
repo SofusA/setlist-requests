@@ -1380,6 +1380,7 @@ dependencies = [
  "futures",
  "mime",
  "rstml-to-string-macro",
+ "serde",
  "sqlx",
  "tokio",
  "tower-http",

@@ -19,7 +19,7 @@ use crate::{
     develop::develop_routes,
     html,
     page::page,
-    setlist::setlist_page,
+    setlist::{add_song, setlist_page},
     view::View,
 };
 
@@ -73,8 +73,8 @@ async fn create_router() -> Router {
     assets_path.push("assets");
 
     let mut router = axum::Router::new()
-        .route("/", axum::routing::get(root))
-        .route("/setlist", axum::routing::get(setlist_page))
+        .route("/", get(root))
+        .route("/setlist", get(setlist_page).post(add_song))
         .route("/api/smoke", get(smoke_test))
         .route("/websocket", get(websocket_handler));
 

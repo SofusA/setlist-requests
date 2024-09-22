@@ -1,7 +1,7 @@
 use crate::{html, view::View};
 
 pub fn page(component: View, title: &str) -> View {
-    let style_url = "/assets/styles.css?version=2";
+    let style_url = "/assets/styles.css?version=5";
     let doctype = "<!DOCTYPE html>";
 
     html! {
@@ -14,13 +14,15 @@ pub fn page(component: View, title: &str) -> View {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet" href=style_url />
                 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+                <script src="https://cdn.jsdelivr.net/gh/gnat/surreal@main/surreal.js"></script>
+                <script src="https://unpkg.com/feather-icons"></script>
             </head>
             <body
-                class="text-black bg-white dark:text-white dark:bg-gray-950"
+                class="text-black bg-white dark:text-white dark:bg-neutral-950"
                 hx-history="false"
             >
 
-                <nav class="w-full text-xl px-3 py-2">FestOrkestret Setlist</nav>
+                <nav class="w-full text-xl px-3 py-2 sticky top-0 bg-neutral-900">FestOrkestret Setlist</nav>
 
                 <div class="flex w-full justify-center p-4">
                     <div class="flex max-w-7xl">{component}</div>

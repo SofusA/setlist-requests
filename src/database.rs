@@ -68,17 +68,18 @@ impl Database {
         artist: &str,
         title: &str,
         description: Option<&str>,
-    ) -> Result<()> {
-        sqlx::query!(
-            "insert into songs values (default, $1, $2, $3)",
+    ) -> Result<Song> {
+        let result = sqlx::query_as!(
+            Song,
+            "insert into songs values (default, $1, $2, $3) returning *",
             artist,
             title,
             description
         )
-        .fetch_all(&self.pool)
+        .fetch_one(&self.pool)
         .await?;
 
-        Ok(())
+        Ok(result)
     }
 
     pub async fn delete_song(&self, id: i32) -> Result<()> {
