@@ -4,7 +4,7 @@ use axum::{
         State, WebSocketUpgrade,
     },
     response::IntoResponse,
-    routing::get,
+    routing::{delete, get},
     Router,
 };
 use dotenv::dotenv;
@@ -19,7 +19,7 @@ use crate::{
     develop::develop_routes,
     html,
     page::page,
-    setlist::{add_song, setlist_page},
+    setlist::{add_song, delete_song, setlist_page},
     view::View,
 };
 
@@ -75,6 +75,7 @@ async fn create_router() -> Router {
     let mut router = axum::Router::new()
         .route("/", get(root))
         .route("/setlist", get(setlist_page).post(add_song))
+        .route("/setlist/:id", delete(delete_song))
         .route("/api/smoke", get(smoke_test))
         .route("/websocket", get(websocket_handler));
 

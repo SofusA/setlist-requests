@@ -1,7 +1,11 @@
 use crate::{app::AppState, database::Song, html, page::page, view::View};
-use axum::{extract::State, Form};
+use axum::{
+    extract::{Path, State},
+    Form,
+};
 use serde::Deserialize;
 use std::sync::Arc;
+use tracing::warn;
 
 #[derive(Deserialize, Debug)]
 pub struct Input {
@@ -25,10 +29,28 @@ pub async fn add_song(State(state): State<Arc<AppState>>, Form(input): Form<Inpu
     song_card(song)
 }
 
+pub async fn delete_song(Path(id): Path<i32>, State(state): State<Arc<AppState>>) {
+    warn!("Deleting song {}", id);
+    state.database.delete_song(id).await.unwrap();
+}
+
 fn song_card(song: Song) -> View {
     html! {
-        <div class="flex flex-col gap-1 p-4 max-w-lg rounded-lg border shadow dark:border-neutral-700 dark:bg-neutral-950">
-            <h2 class="text-2xl font-semibold whitespace-nowrap">{song.title}</h2>
+        <div
+            id=format!("song-{}", song.id)
+            class="flex flex-col gap-1 p-4 max-w-lg rounded-lg border shadow dark:border-neutral-700 dark:bg-neutral-950"
+        >
+            <div class="flex flex-wrap gap-2 justify-between items-center">
+                <h2 class="text-2xl font-semibold whitespace-nowrap">{song.title}</h2>
+
+                <button
+                    hx-delete=format!("/setlist/{}", song.id)
+                    hx-target=format!("#song-{}", song.id)
+                    hx-swap="outerHTML"
+                >
+                    <i class="text-red-500" data-feather="trash"></i>
+                </button>
+            </div>
             <h4 class="text-sm text-neutral-500">{song.artist}</h4>
             {if let Some(description) = song.description {
                 html! { <p class="pt-2">{description}</p> }
@@ -85,7 +107,6 @@ pub async fn setlist_page(State(state): State<Arc<AppState>>) -> View {
             </form>
             <div class="flex flex-col items-center p-4 max-w-lg rounded-lg border shadow transition-colors cursor-pointer hover:text-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-950">
                 <i data-feather="plus-circle"></i>
-                <script>feather.replace();</script>
                 <script>
                     me().on("click", ev => {
                         me("#add-song-form").classToggle("hidden");

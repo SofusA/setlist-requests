@@ -1,7 +1,7 @@
 use crate::{html, view::View};
 
 pub fn page(component: View, title: &str) -> View {
-    let style_url = "/assets/styles.css?version=5";
+    let style_url = "/assets/styles.css?version=6";
     let doctype = "<!DOCTYPE html>";
 
     html! {
@@ -28,7 +28,7 @@ pub fn page(component: View, title: &str) -> View {
                     <div class="flex max-w-7xl">{component}</div>
                 </div>
 
-                <script src="/assets/scripts/htmx-config.js?version=1"></script>
+                <script src="/assets/scripts/htmx-config.js?version=2"></script>
 
                 {if cfg!(debug_assertions) {
                     html! { <script src="/assets/scripts/develop-updates.js"></script> }
