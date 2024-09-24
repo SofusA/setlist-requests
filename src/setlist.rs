@@ -8,13 +8,16 @@ use std::sync::Arc;
 use tracing::warn;
 
 #[derive(Deserialize, Debug)]
-pub struct Input {
+pub struct CreateSongInput {
     title: String,
     artist: String,
     description: String,
 }
 
-pub async fn add_song(State(state): State<Arc<AppState>>, Form(input): Form<Input>) -> View {
+pub async fn add_song(
+    State(state): State<Arc<AppState>>,
+    Form(input): Form<CreateSongInput>,
+) -> View {
     let description = match input.description.is_empty() {
         true => None,
         false => Some(input.description.as_str()),

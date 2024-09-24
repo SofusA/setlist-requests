@@ -4,7 +4,7 @@ use axum::{
         State, WebSocketUpgrade,
     },
     response::IntoResponse,
-    routing::{delete, get},
+    routing::{delete, get, post},
     Router,
 };
 use dotenv::dotenv;
@@ -17,10 +17,8 @@ use tracing::info;
 use crate::{
     database::{Credentials, Database},
     develop::develop_routes,
-    html,
-    page::page,
     setlist::{add_song, delete_song, setlist_page},
-    view::View,
+    vote::{vote_for_song, vote_songs},
 };
 
 pub struct AppState {
@@ -73,9 +71,10 @@ async fn create_router() -> Router {
     assets_path.push("assets");
 
     let mut router = axum::Router::new()
-        .route("/", get(root))
+        .route("/", get(vote_songs))
         .route("/setlist", get(setlist_page).post(add_song))
         .route("/setlist/:id", delete(delete_song))
+        .route("/vote/:username/:song_id", post(vote_for_song))
         .route("/api/smoke", get(smoke_test))
         .route("/websocket", get(websocket_handler));
 
@@ -92,16 +91,6 @@ async fn create_router() -> Router {
         );
 
     router.with_state(shared_state)
-}
-
-async fn root() -> View {
-    let hello = html! {
-        <div class="flex justify-center w-full">
-            <span>Hello</span>
-        </div>
-    };
-
-    page(hello, "FestOrkestret Setlist")
 }
 
 async fn smoke_test() -> impl IntoResponse {

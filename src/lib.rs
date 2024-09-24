@@ -4,3 +4,4 @@ pub mod develop;
 pub mod page;
 pub mod setlist;
 pub mod view;
+pub mod vote;
