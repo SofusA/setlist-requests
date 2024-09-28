@@ -1,6 +1,6 @@
 pub mod app;
 pub mod database;
-pub mod develop;
+pub mod icons;
 pub mod page;
 pub mod setlist;
 pub mod view;

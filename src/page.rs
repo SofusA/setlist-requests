@@ -1,7 +1,7 @@
 use crate::{html, view::View};
 
 pub fn page(component: View, title: &str) -> View {
-    let style_url = "/assets/styles.css?version=6";
+    let style_url = "/assets/styles.css?version=10";
     let doctype = "<!DOCTYPE html>";
 
     html! {
@@ -14,8 +14,6 @@ pub fn page(component: View, title: &str) -> View {
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet" href=style_url />
                 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-                <script src="https://cdn.jsdelivr.net/gh/gnat/surreal@main/surreal.js"></script>
-                <script src="https://unpkg.com/feather-icons"></script>
             </head>
             <body
                 class="text-black bg-white dark:text-white dark:bg-neutral-950"

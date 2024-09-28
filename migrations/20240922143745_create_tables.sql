@@ -6,8 +6,9 @@ CREATE TABLE IF NOT EXISTS songs (
 );
 
 CREATE TABLE IF NOT EXISTS votes (
-    id serial primary key not null unique, 
-    username text not null,
-    song_id int not null,
-    FOREIGN KEY (song_id) REFERENCES songs(id)
+    id serial PRIMARY KEY NOT NULL UNIQUE, 
+    session_id text NOT NULL,
+    song_id int NOT NULL,
+    CONSTRAINT unique_session_song UNIQUE (session_id, song_id),
+    FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
 );

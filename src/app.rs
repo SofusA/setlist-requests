@@ -1,14 +1,17 @@
 use axum::{
     extract::{
         ws::{Message, WebSocket},
-        State, WebSocketUpgrade,
+        Request, State, WebSocketUpgrade,
     },
-    response::IntoResponse,
+    middleware::{self, Next},
+    response::{IntoResponse, Response},
     routing::{delete, get, post},
     Router,
 };
+use axum_extra::extract::{cookie::Cookie, CookieJar};
 use dotenv::dotenv;
 use futures::{sink::SinkExt, stream::StreamExt};
+use random_string::{charsets, generate};
 use std::{env, sync::Arc};
 use tokio::sync::watch::{channel, Receiver, Sender};
 use tower_http::{services::ServeDir, trace};
@@ -16,9 +19,8 @@ use tracing::info;
 
 use crate::{
     database::{Credentials, Database},
-    develop::develop_routes,
-    setlist::{add_song, delete_song, setlist_page},
-    vote::{vote_for_song, vote_songs},
+    setlist::{add_song, clear_votes, delete_song, setlist_page},
+    vote::{delete_vote, vote_for_song, vote_songs},
 };
 
 pub struct AppState {
@@ -74,13 +76,10 @@ async fn create_router() -> Router {
         .route("/", get(vote_songs))
         .route("/setlist", get(setlist_page).post(add_song))
         .route("/setlist/:id", delete(delete_song))
-        .route("/vote/:username/:song_id", post(vote_for_song))
+        .route("/setlist/votes/clear", post(clear_votes))
+        .route("/vote/:song_id", post(vote_for_song).delete(delete_vote))
         .route("/api/smoke", get(smoke_test))
         .route("/websocket", get(websocket_handler));
-
-    if cfg!(debug_assertions) {
-        router = router.nest("/", develop_routes())
-    }
 
     router = router
         .nest_service("/assets", ServeDir::new(assets_path.to_str().unwrap()))
@@ -88,7 +87,8 @@ async fn create_router() -> Router {
             tower_http::trace::TraceLayer::new_for_http()
                 .make_span_with(trace::DefaultMakeSpan::new().level(tracing::Level::DEBUG))
                 .on_response(trace::DefaultOnResponse::new().level(tracing::Level::DEBUG)),
-        );
+        )
+        .layer(middleware::from_fn(remember_me));
 
     router.with_state(shared_state)
 }
@@ -120,4 +120,11 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
             }
         }
     });
+}
+
+async fn remember_me(mut jar: CookieJar, request: Request, next: Next) -> (CookieJar, Response) {
+    if jar.get("session_id").is_none() {
+        jar = jar.add(Cookie::new("session_id", generate(6, charsets::ALPHA)));
+    }
+    (jar, next.run(request).await)
 }

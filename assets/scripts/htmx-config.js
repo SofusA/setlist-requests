@@ -3,7 +3,3 @@ document.body.addEventListener("htmx:responseError", function (event) {
     window.location.reload();
   }
 });
-
-document.addEventListener("htmx:load", function () {
-  feather.replace();
-});

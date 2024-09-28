@@ -1,4 +1,4 @@
-use crate::{app::AppState, database::Song, html, page::page, view::View};
+use crate::{app::AppState, database::Song, html, icons, page::page, view::View};
 use axum::{
     extract::{Path, State},
     Form,
@@ -50,8 +50,9 @@ fn song_card(song: Song) -> View {
                     hx-delete=format!("/setlist/{}", song.id)
                     hx-target=format!("#song-{}", song.id)
                     hx-swap="outerHTML"
+                    class="text-red-500"
                 >
-                    <i class="text-red-500" data-feather="trash"></i>
+                    {icons::trash_2()}
                 </button>
             </div>
             <h4 class="text-sm text-neutral-500">{song.artist}</h4>
@@ -62,6 +63,10 @@ fn song_card(song: Song) -> View {
             }}
         </div>
     }
+}
+
+pub async fn clear_votes(State(state): State<Arc<AppState>>) {
+    state.database.clear_votes().await.unwrap();
 }
 
 pub async fn setlist_page(State(state): State<Arc<AppState>>) -> View {
@@ -75,48 +80,57 @@ pub async fn setlist_page(State(state): State<Arc<AppState>>) -> View {
         .collect::<View>();
 
     let song_container = html! {
-        <div class="flex flex-col gap-3">
-            {songs}
-            <form
-                id="add-song-form"
-                hx-post="/setlist"
-                hx-swap="beforebegin"
-                class="hidden flex-col gap-3 p-4 max-w-lg rounded-lg border shadow text-neutral-500 dark:border-neutral-700 dark:bg-neutral-950"
+        <div class="flex flex-col gap-3 min-w-96">
+            <button
+                hx-post="/setlist/votes/clear"
+                hx-swap="none"
+                class="flex gap-3 justify-center p-4 max-w-lg rounded-lg border shadow transition-colors dark:border-neutral-700 dark:bg-neutral-950"
             >
-                <label class="dark:text-white" for="title">
-                    {"Title:"}
-                </label>
-                <input class="p-1 rounded bg-neutral-300" type="text" id="title" name="title" />
-                <label class="dark:text-white" for="artist">
+                <p>Clear votes</p>
+                <p class="text-red-500">{icons::trash_2()}</p>
+            </button>
+            {songs}
+            <details>
+                <form
+                    id="add-song-form"
+                    hx-post="/setlist"
+                    hx-swap="beforebegin"
+                    class="flex flex-col gap-3 p-4 mt-3 max-w-lg rounded-lg border shadow text-neutral-500 dark:border-neutral-700 dark:bg-neutral-950"
+                >
+                    <label class="dark:text-white" for="title">
+                        {"Title:"}
+                    </label>
+                    <input class="p-1 rounded bg-neutral-300" type="text" id="title" name="title" />
+                    <label class="dark:text-white" for="artist">
 
-                    {"Artist:"}
+                        {"Artist:"}
 
-                </label>
-                <input class="p-1 rounded bg-neutral-300" type="text" id="artist" name="artist" />
-                <label class="dark:text-white" for="description">
-                    {"Description:"}
-                </label>
-                <textarea
-                    class="p-1 rounded bg-neutral-300"
-                    id="description"
-                    name="description"
-                ></textarea>
+                    </label>
+                    <input
+                        class="p-1 rounded bg-neutral-300"
+                        type="text"
+                        id="artist"
+                        name="artist"
+                    />
+                    <label class="dark:text-white" for="description">
+                        {"Description:"}
+                    </label>
+                    <textarea
+                        class="p-1 rounded bg-neutral-300"
+                        id="description"
+                        name="description"
+                    ></textarea>
 
-                <input
-                    class="p-1 text-white bg-blue-500 rounded transition-colors hover:bg-blue-400"
-                    type="submit"
-                    value="Submit"
-                />
-            </form>
-            <div class="flex flex-col items-center p-4 max-w-lg rounded-lg border shadow transition-colors cursor-pointer hover:text-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-950">
-                <i data-feather="plus-circle"></i>
-                <script>
-                    me().on("click", ev => {
-                        me("#add-song-form").classToggle("hidden");
-                        me("#add-song-form").classToggle("flex");
-                    })
-                </script>
-            </div>
+                    <input
+                        class="p-1 text-white bg-blue-500 rounded transition-colors hover:bg-blue-400"
+                        type="submit"
+                        value="Submit"
+                    />
+                </form>
+                <summary class="flex flex-col items-center p-4 max-w-lg rounded-lg border shadow transition-colors cursor-pointer hover:text-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-950">
+                    {icons::plus_circle()}
+                </summary>
+            </details>
         </div>
     };
 

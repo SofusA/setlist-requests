@@ -35,24 +35,42 @@ impl Database {
         Ok(result)
     }
 
-    pub async fn get_votes(&self) -> Result<Vec<Vote>> {
-        let result = sqlx::query_as!(Vote, "select * from votes")
-            .fetch_all(&self.pool)
-            .await?;
-
-        Ok(result)
-    }
-
-    pub async fn create_vote(&self, username: &str, song_id: i32) -> Result<()> {
-        sqlx::query!(
-            "insert into votes values (default, $1, $2)",
-            username,
-            song_id
+    pub async fn get_votes(&self, session_id: &str) -> Result<Vec<Vote>> {
+        let result = sqlx::query_as!(
+            Vote,
+            "select * from votes where session_id = $1",
+            session_id
         )
         .fetch_all(&self.pool)
         .await?;
 
-        Ok(())
+        Ok(result)
+    }
+
+    pub async fn create_vote(&self, username: &str, song_id: i32) -> Result<Song> {
+        let result = sqlx::query_as!(
+            Song,
+            "with inserted_vote as (insert into votes values (default ,$1, $2) on conflict (session_id, song_id) do nothing returning song_id) select s.* from inserted_vote iv join songs s on iv.song_id = s.id",
+            username,
+            song_id
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(result)
+    }
+
+    pub async fn delete_vote(&self, username: &str, song_id: i32) -> Result<Song> {
+        let result = sqlx::query_as!(
+            Song,
+            "with deleted_vote as (delete from votes where session_id = $1 and song_id = $2 returning song_id) select s.* from deleted_vote dv join songs s on dv.song_id = s.id",
+            username,
+            song_id
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(result)
     }
 
     pub async fn clear_votes(&self) -> Result<()> {
@@ -114,6 +132,6 @@ pub struct Song {
 #[derive(sqlx::FromRow)]
 pub struct Vote {
     pub id: i32,
-    pub username: String,
+    pub session_id: String,
     pub song_id: i32,
 }
