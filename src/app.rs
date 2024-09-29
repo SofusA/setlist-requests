@@ -8,7 +8,10 @@ use axum::{
     routing::{delete, get, post},
     Router,
 };
-use axum_extra::extract::{cookie::Cookie, CookieJar};
+use axum_extra::extract::{
+    cookie::{Cookie, SameSite},
+    CookieJar,
+};
 use dotenv::dotenv;
 use futures::{sink::SinkExt, stream::StreamExt};
 use random_string::{charsets, generate};
@@ -19,7 +22,10 @@ use tracing::info;
 
 use crate::{
     database::{Credentials, Database},
+    html,
+    page::page,
     setlist::{add_song, clear_votes, delete_song, setlist_page},
+    view::View,
     vote::{delete_vote, vote_for_song, vote_songs},
     vote_results::vote_result_page,
 };
@@ -73,17 +79,16 @@ async fn create_router() -> Router {
     let mut assets_path = std::env::current_dir().unwrap();
     assets_path.push("assets");
 
-    let mut router = axum::Router::new()
-        .route("/", get(vote_songs))
+    let router = axum::Router::new()
+        .route("/", get(index))
+        .route("/vote", get(vote_songs))
         .route("/setlist", get(setlist_page).post(add_song))
         .route("/setlist/:id", delete(delete_song))
         .route("/setlist/votes/clear", post(clear_votes))
         .route("/vote/results", get(vote_result_page))
         .route("/vote/:song_id", post(vote_for_song).delete(delete_vote))
         .route("/api/smoke", get(smoke_test))
-        .route("/websocket", get(websocket_handler));
-
-    router = router
+        .route("/websocket", get(websocket_handler))
         .nest_service("/assets", ServeDir::new(assets_path.to_str().unwrap()))
         .layer(
             tower_http::trace::TraceLayer::new_for_http()
@@ -93,6 +98,23 @@ async fn create_router() -> Router {
         .layer(middleware::from_fn(remember_me));
 
     router.with_state(shared_state)
+}
+
+async fn index() -> View {
+    let index = html! {
+        <div class="flex flex-col gap-4">
+            <h1 class="text-lg">Stem på hvilke sange FestOrkestret spiller efter pausen</h1>
+
+            <a
+                class="p-2 text-lg text-center text-white bg-blue-500 rounded transition-colors hover:bg-blue-400"
+                href="/vote"
+            >
+                Stem her
+            </a>
+        </div>
+    };
+
+    page(index, "Festorkestret Setlist")
 }
 
 async fn smoke_test() -> impl IntoResponse {
@@ -107,7 +129,6 @@ async fn websocket_handler(
 }
 
 async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
-    info!("New client!");
     let (mut sender, _) = socket.split();
 
     let mut rx = state.rx.clone();
@@ -126,7 +147,9 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
 
 async fn remember_me(mut jar: CookieJar, request: Request, next: Next) -> (CookieJar, Response) {
     if jar.get("session_id").is_none() {
-        jar = jar.add(Cookie::new("session_id", generate(6, charsets::ALPHA)));
+        let mut cookie = Cookie::new("session_id", generate(6, charsets::ALPHA));
+        cookie.set_same_site(SameSite::Strict);
+        jar = jar.add(cookie);
     }
     (jar, next.run(request).await)
 }

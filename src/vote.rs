@@ -1,11 +1,22 @@
-use crate::{app::AppState, database::Song, html, icons, page::page, view::View};
-use axum::extract::{Path, State};
+use crate::{
+    app::AppState, database::Song, html, icons, page::page, view::View, vote_results::votes_updated,
+};
+use axum::{
+    extract::{Path, State},
+    response::Redirect,
+};
 use axum_extra::extract::CookieJar;
 use std::sync::Arc;
 use tracing::warn;
 
-pub async fn vote_songs(State(state): State<Arc<AppState>>, jar: CookieJar) -> View {
-    let session_id = jar.get("session_id").unwrap().value_trimmed();
+pub async fn vote_songs(
+    State(state): State<Arc<AppState>>,
+    jar: CookieJar,
+) -> Result<View, Redirect> {
+    let session_id = match jar.get("session_id") {
+        Some(res) => res.value_trimmed(),
+        None => return Err(Redirect::to("/")),
+    };
 
     let votes: Vec<i32> = state
         .database
@@ -27,7 +38,7 @@ pub async fn vote_songs(State(state): State<Arc<AppState>>, jar: CookieJar) -> V
 
     let song_container = html! { <div class="flex flex-col gap-3 w-full max-w-lg">{songs}</div> };
 
-    page(song_container, "Setlist")
+    Ok(page(song_container, "Setlist"))
 }
 
 pub async fn vote_for_song(
@@ -44,6 +55,8 @@ pub async fn vote_for_song(
         .create_vote(session_id, song_id)
         .await
         .unwrap();
+
+    votes_updated(&state.tx, &state.database).await;
 
     song_card(true, song)
 }
@@ -62,6 +75,8 @@ pub async fn delete_vote(
         .delete_vote(session_id, song_id)
         .await
         .unwrap();
+
+    votes_updated(&state.tx, &state.database).await;
 
     song_card(false, song)
 }
