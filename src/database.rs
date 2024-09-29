@@ -35,6 +35,45 @@ impl Database {
         Ok(result)
     }
 
+    pub async fn get_vote_results(&self) -> Result<Vec<VoteResult>> {
+        let rows: Vec<SongWithVotes> = sqlx::query_as!(
+            SongWithVotes,
+            r#"
+        SELECT 
+            s.id, 
+            s.artist, 
+            s.title, 
+            s.description, 
+            COUNT(v.id) AS vote_count
+        FROM 
+            songs s
+        LEFT JOIN 
+            votes v ON s.id = v.song_id
+        GROUP BY 
+            s.id
+        "#
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        let mut result: Vec<_> = rows
+            .into_iter()
+            .map(|row| VoteResult {
+                song: Song {
+                    id: row.id,
+                    artist: row.artist,
+                    title: row.title,
+                    description: row.description,
+                },
+                vote_count: row.vote_count.unwrap_or(0),
+            })
+            .collect();
+
+        result.sort_unstable_by(|a, b| b.vote_count.cmp(&a.vote_count));
+
+        Ok(result)
+    }
+
     pub async fn get_votes(&self, session_id: &str) -> Result<Vec<Vote>> {
         let result = sqlx::query_as!(
             Vote,
@@ -134,4 +173,18 @@ pub struct Vote {
     pub id: i32,
     pub session_id: String,
     pub song_id: i32,
+}
+
+#[derive(sqlx::FromRow)]
+struct SongWithVotes {
+    id: i32,
+    artist: String,
+    title: String,
+    description: Option<String>,
+    vote_count: Option<i64>,
+}
+
+pub struct VoteResult {
+    pub song: Song,
+    pub vote_count: i64,
 }

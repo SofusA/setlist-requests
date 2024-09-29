@@ -5,3 +5,4 @@ pub mod page;
 pub mod setlist;
 pub mod view;
 pub mod vote;
+pub mod vote_results;

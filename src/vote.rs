@@ -25,7 +25,7 @@ pub async fn vote_songs(State(state): State<Arc<AppState>>, jar: CookieJar) -> V
         .map(|x| song_card(votes.contains(&x.id), x))
         .collect::<View>();
 
-    let song_container = html! { <div class="flex flex-col gap-3 min-w-96">{songs}</div> };
+    let song_container = html! { <div class="flex flex-col gap-3 w-full max-w-lg">{songs}</div> };
 
     page(song_container, "Setlist")
 }
@@ -77,12 +77,12 @@ fn song_card(voted_for: bool, song: Song) -> View {
             hx-swap="outerHTML"
             id=format!("song-{}", song.id)
             class=format!(
-                "flex transition-all flex-col gap-1 p-4 max-w-lg rounded-lg border shadow  dark:bg-neutral-950 items-start {}",
+                "flex transition-all flex-col gap-1 p-4 w-full rounded-lg border shadow dark:bg-neutral-950 items-start {}",
                 if voted_for { "border-blue-500" } else { "dark:border-neutral-700" },
             )
         >
             <div class="flex flex-wrap gap-2 justify-between items-center w-full">
-                <h2 class="text-2xl font-semibold whitespace-nowrap">{song.title}</h2>
+                <h2 class="text-2xl font-semibold">{song.title}</h2>
                 <span class=if voted_for {
                     "text-blue-500"
                 } else {

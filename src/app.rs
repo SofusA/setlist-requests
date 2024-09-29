@@ -21,6 +21,7 @@ use crate::{
     database::{Credentials, Database},
     setlist::{add_song, clear_votes, delete_song, setlist_page},
     vote::{delete_vote, vote_for_song, vote_songs},
+    vote_results::vote_result_page,
 };
 
 pub struct AppState {
@@ -77,6 +78,7 @@ async fn create_router() -> Router {
         .route("/setlist", get(setlist_page).post(add_song))
         .route("/setlist/:id", delete(delete_song))
         .route("/setlist/votes/clear", post(clear_votes))
+        .route("/vote/results", get(vote_result_page))
         .route("/vote/:song_id", post(vote_for_song).delete(delete_vote))
         .route("/api/smoke", get(smoke_test))
         .route("/websocket", get(websocket_handler));

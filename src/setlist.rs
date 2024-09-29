@@ -41,7 +41,7 @@ fn song_card(song: Song) -> View {
     html! {
         <div
             id=format!("song-{}", song.id)
-            class="flex flex-col gap-1 p-4 max-w-lg rounded-lg border shadow dark:border-neutral-700 dark:bg-neutral-950"
+            class="flex flex-col gap-1 p-4 rounded-lg border shadow dark:border-neutral-700 dark:bg-neutral-950"
         >
             <div class="flex flex-wrap gap-2 justify-between items-center">
                 <h2 class="text-2xl font-semibold whitespace-nowrap">{song.title}</h2>
@@ -80,7 +80,7 @@ pub async fn setlist_page(State(state): State<Arc<AppState>>) -> View {
         .collect::<View>();
 
     let song_container = html! {
-        <div class="flex flex-col gap-3 min-w-96">
+        <div class="flex flex-col gap-3 w-full max-w-lg">
             <button
                 hx-post="/setlist/votes/clear"
                 hx-swap="none"
@@ -90,10 +90,11 @@ pub async fn setlist_page(State(state): State<Arc<AppState>>) -> View {
                 <p class="text-red-500">{icons::trash_2()}</p>
             </button>
             {songs}
-            <details>
+            <details id="add-song">
                 <form
                     id="add-song-form"
                     hx-post="/setlist"
+                    hx-target="#add-song"
                     hx-swap="beforebegin"
                     class="flex flex-col gap-3 p-4 mt-3 max-w-lg rounded-lg border shadow text-neutral-500 dark:border-neutral-700 dark:bg-neutral-950"
                 >
