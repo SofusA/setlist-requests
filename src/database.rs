@@ -5,8 +5,12 @@ use tracing::{info, warn};
 impl Database {
     pub async fn new(credentials: Credentials) -> Database {
         let database_url = format!(
-            "postgresql://{}:{}@{}:5432/{}",
-            credentials.user, credentials.secret, credentials.hostname, credentials.database
+            "postgresql://{}:{}@{}:{}/{}",
+            credentials.user,
+            credentials.secret,
+            credentials.hostname,
+            credentials.port,
+            credentials.database
         );
 
         let pool = PgPoolOptions::new()
@@ -154,6 +158,7 @@ pub struct Credentials {
     pub secret: String,
     pub user: String,
     pub database: String,
+    pub port: i32,
 }
 
 pub struct Database {

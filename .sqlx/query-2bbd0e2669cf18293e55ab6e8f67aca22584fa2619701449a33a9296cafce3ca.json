@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "truncate table votes",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "2bbd0e2669cf18293e55ab6e8f67aca22584fa2619701449a33a9296cafce3ca"
+}
