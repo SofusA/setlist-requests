@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test and deploy health check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup | Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup | Setup Node
+        uses: actions/setup-node@v3
+      
+      - name: Setup | Npm install
+        run: npm ci
+
+      - name: Build | Build tailwind
+        run: npm run build
+
+      - name: Setup | Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Build and publish "latest" Docker image
+        uses: VaultVulp/gp-docker-action@1.6.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }} 
+          image-name: ${{ github.event.repository.name }} 
+          dockerfile: Containerfile
+

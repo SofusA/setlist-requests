@@ -39,14 +39,11 @@ pub struct AppState {
 pub fn get_credentials() -> Credentials {
     dotenv().ok();
 
-    let hostname = env::var("DATABASE_HOSTNAME").unwrap_or("localhost".to_string());
-    let secret = env::var("DATABASE_SECRET").unwrap_or("postgres".to_string());
-    let user = env::var("DATABASE_USER").unwrap_or("postgres".to_string());
-    let database = env::var("DATABASE_NAME").unwrap_or("postgres".to_string());
-    let port = env::var("DATABASE_PORT")
-        .unwrap()
-        .parse::<i32>()
-        .unwrap_or(5432);
+    let hostname = env::var("DATABASE_HOSTNAME").unwrap();
+    let secret = env::var("DATABASE_SECRET").unwrap();
+    let user = env::var("DATABASE_USER").unwrap();
+    let database = env::var("DATABASE_NAME").unwrap();
+    let port = env::var("DATABASE_PORT").unwrap().parse::<i32>().unwrap();
 
     Credentials {
         secret,
