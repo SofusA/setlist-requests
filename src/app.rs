@@ -5,7 +5,7 @@ use axum::{
     },
     middleware::{self, Next},
     response::{IntoResponse, Response},
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
     Router,
 };
 use axum_extra::extract::{
@@ -24,7 +24,7 @@ use crate::{
     database::{Credentials, Database},
     html,
     page::page,
-    setlist::{add_song, clear_votes, delete_song, setlist_page},
+    setlist::{add_song, clear_votes, delete_song, hide_song, setlist_page, unhide_song},
     view::View,
     vote::{delete_vote, vote_for_song, vote_songs},
     vote_results::vote_result_page,
@@ -86,6 +86,8 @@ async fn create_router() -> Router {
         .route("/vote", get(vote_songs))
         .route("/setlist", get(setlist_page).post(add_song))
         .route("/setlist/:id", delete(delete_song))
+        .route("/setlist/:id/hide", put(hide_song))
+        .route("/setlist/:id/unhide", put(unhide_song))
         .route("/setlist/votes/clear", post(clear_votes))
         .route("/vote/results", get(vote_result_page))
         .route("/vote/:song_id", post(vote_for_song).delete(delete_vote))

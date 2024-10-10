@@ -1,5 +1,6 @@
 use crate::{
-    app::AppState, database::Song, html, icons, page::page, view::View, vote_results::votes_updated,
+    app::AppState, database::Song, errors::BadRequestError, html, icons, page::page, view::View,
+    vote_results::votes_updated,
 };
 use axum::{
     extract::{Path, State},
@@ -8,6 +9,8 @@ use axum::{
 use axum_extra::extract::CookieJar;
 use std::sync::Arc;
 use tracing::warn;
+
+const MAX_VOTES: i64 = 5;
 
 pub async fn vote_songs(
     State(state): State<Arc<AppState>>,
@@ -33,10 +36,34 @@ pub async fn vote_songs(
         .await
         .unwrap()
         .into_iter()
+        .filter(|x| !x.hidden)
         .map(|x| song_card(votes.contains(&x.id), x))
         .collect::<View>();
 
-    let song_container = html! { <div class="flex flex-col gap-3 w-full max-w-lg">{songs}</div> };
+    let current_votes = state.database.count_votes(session_id).await.unwrap();
+
+    let song_container = html! {
+        <div class="flex flex-col gap-3 w-full max-w-lg">
+            <div>
+                <span id="current_votes">{current_votes}</span>
+                {"&nbsp;"}
+                <span>ud af</span>
+                {"&nbsp;"}
+                <span>{MAX_VOTES}</span>
+                {"&nbsp;"}
+                <span>stemmer</span>
+            </div>
+
+            <div class="flex flex-col gap-3">{songs}</div>
+
+            <a
+                href="/"
+                class="flex justify-center py-2 px-3 text-white bg-blue-500 rounded hover:bg-blue-400"
+            >
+                Afslut
+            </a>
+        </div>
+    };
 
     Ok(page(song_container, "Setlist"))
 }
@@ -45,10 +72,16 @@ pub async fn vote_for_song(
     State(state): State<Arc<AppState>>,
     Path(song_id): Path<i32>,
     jar: CookieJar,
-) -> View {
+) -> Result<View, BadRequestError> {
     let session_id = jar.get("session_id").unwrap().value_trimmed();
 
     warn!("New vote for song {} by {}", song_id, session_id);
+
+    let vote_count = state.database.count_votes(session_id).await.unwrap();
+
+    if vote_count >= MAX_VOTES {
+        return Err(BadRequestError::TooManyVotes);
+    }
 
     let song = state
         .database
@@ -58,7 +91,12 @@ pub async fn vote_for_song(
 
     votes_updated(&state.tx, &state.database).await;
 
-    song_card(true, song)
+    Ok(html! {
+        {song_card(true, song)}
+        <span id="current_votes" hx-swap-oob="true">
+            {vote_count + 1}
+        </span>
+    })
 }
 
 pub async fn delete_vote(
@@ -78,7 +116,14 @@ pub async fn delete_vote(
 
     votes_updated(&state.tx, &state.database).await;
 
-    song_card(false, song)
+    let vote_count = state.database.count_votes(session_id).await.unwrap();
+
+    html! {
+        {song_card(false, song)}
+        <span id="current_votes" hx-swap-oob="true">
+            {vote_count}
+        </span>
+    }
 }
 
 fn song_card(voted_for: bool, song: Song) -> View {
@@ -92,7 +137,7 @@ fn song_card(voted_for: bool, song: Song) -> View {
             hx-swap="outerHTML"
             id=format!("song-{}", song.id)
             class=format!(
-                "flex transition-all flex-col gap-1 p-4 w-full rounded-lg border shadow dark:bg-neutral-950 items-start {}",
+                "flex transition-all flex-col gap-1 p-4 w-full rounded-lg border shadow items-start {}",
                 if voted_for { "border-blue-500" } else { "dark:border-neutral-700" },
             )
         >

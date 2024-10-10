@@ -1,0 +1,2 @@
+ALTER TABLE songs 
+ADD COLUMN hidden boolean NOT NULL DEFAULT FALSE

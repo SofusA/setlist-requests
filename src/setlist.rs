@@ -37,25 +37,67 @@ pub async fn delete_song(Path(id): Path<i32>, State(state): State<Arc<AppState>>
     state.database.delete_song(id).await.unwrap();
 }
 
+pub async fn hide_song(Path(id): Path<i32>, State(state): State<Arc<AppState>>) -> View {
+    warn!("Hiding song {}", id);
+    let song = state.database.hide_song(id).await.unwrap();
+
+    song_card(song)
+}
+
+pub async fn unhide_song(Path(id): Path<i32>, State(state): State<Arc<AppState>>) -> View {
+    warn!("Unhiding song {}", id);
+    let song = state.database.unhide_song(id).await.unwrap();
+
+    song_card(song)
+}
+
 fn song_card(song: Song) -> View {
     html! {
         <div
             id=format!("song-{}", song.id)
-            class="flex flex-col gap-1 p-4 rounded-lg border shadow dark:border-neutral-700 dark:bg-neutral-950"
+            class=format!(
+                "flex flex-col gap-1 p-4 rounded-lg border shadow dark:border-neutral-700 dark:bg-neutral-950 transition-colors {}",
+                if song.hidden { "text-neutral-500" } else { Default::default() },
+            )
         >
             <div class="flex flex-wrap gap-2 justify-between items-center">
                 <h2 class="text-2xl font-semibold whitespace-nowrap">{song.title}</h2>
 
-                <button
-                    hx-delete=format!("/setlist/{}", song.id)
-                    hx-target=format!("#song-{}", song.id)
-                    hx-swap="outerHTML"
-                    class="text-red-500"
-                >
-                    {icons::trash_2()}
-                </button>
+                <div class="flex gap-4">
+                    {if song.hidden {
+                        html! {
+                            <button
+                                title="Unhide song"
+                                hx-put=format!("/setlist/{}/unhide", song.id)
+                                hx-target=format!("#song-{}", song.id)
+                                hx-swap="outerHTML"
+                            >
+                                {icons::eye()}
+                            </button>
+                        }
+                    } else {
+                        html! {
+                            <button
+                                title="Hide song"
+                                hx-put=format!("/setlist/{}/hide", song.id)
+                                hx-target=format!("#song-{}", song.id)
+                                hx-swap="outerHTML"
+                            >
+                                {icons::eye_off()}
+                            </button>
+                        }
+                    }}
+                    <button
+                        hx-delete=format!("/setlist/{}", song.id)
+                        hx-target=format!("#song-{}", song.id)
+                        hx-swap="outerHTML"
+                        class="text-red-500"
+                    >
+                        {icons::trash_2()}
+                    </button>
+                </div>
             </div>
-            <h4 class="text-sm text-neutral-500">{song.artist}</h4>
+            <h4 class="text-sm">{song.artist}</h4>
             {if let Some(description) = song.description {
                 html! { <p class="pt-2">{description}</p> }
             } else {

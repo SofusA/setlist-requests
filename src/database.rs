@@ -32,7 +32,7 @@ impl Database {
     }
 
     pub async fn get_setlist(&self) -> Result<Vec<Song>> {
-        let result = sqlx::query_as!(Song, "select * from songs")
+        let result = sqlx::query_as!(Song, "select * from songs order by artist")
             .fetch_all(&self.pool)
             .await?;
 
@@ -47,7 +47,8 @@ impl Database {
             s.id, 
             s.artist, 
             s.title, 
-            s.description, 
+            s.hidden,
+            s.description,
             COUNT(v.id) AS vote_count
         FROM 
             songs s
@@ -68,9 +69,11 @@ impl Database {
                     artist: row.artist,
                     title: row.title,
                     description: row.description,
+                    hidden: row.hidden,
                 },
                 vote_count: row.vote_count.unwrap_or(0),
             })
+            .filter(|result| !result.song.hidden)
             .collect();
 
         result.sort_unstable_by(|a, b| b.vote_count.cmp(&a.vote_count));
@@ -88,6 +91,17 @@ impl Database {
         .await?;
 
         Ok(result)
+    }
+
+    pub async fn count_votes(&self, session_id: &str) -> Result<i64> {
+        let result = sqlx::query_scalar!(
+            "select count(session_id) from votes where session_id = $1",
+            session_id
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(result.unwrap_or(0))
     }
 
     pub async fn create_vote(&self, username: &str, song_id: i32) -> Result<Song> {
@@ -150,6 +164,30 @@ impl Database {
 
         Ok(())
     }
+
+    pub async fn hide_song(&self, id: i32) -> Result<Song> {
+        let song = sqlx::query_as!(
+            Song,
+            "update songs set hidden = true where id = $1 returning *",
+            id
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(song)
+    }
+
+    pub async fn unhide_song(&self, id: i32) -> Result<Song> {
+        let song = sqlx::query_as!(
+            Song,
+            "update songs set hidden = false where id = $1 returning *",
+            id
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok(song)
+    }
 }
 
 #[derive(Clone)]
@@ -171,6 +209,7 @@ pub struct Song {
     pub artist: String,
     pub title: String,
     pub description: Option<String>,
+    pub hidden: bool,
 }
 
 #[derive(sqlx::FromRow)]
@@ -180,12 +219,12 @@ pub struct Vote {
     pub song_id: i32,
 }
 
-#[derive(sqlx::FromRow)]
 struct SongWithVotes {
     id: i32,
     artist: String,
     title: String,
     description: Option<String>,
+    pub hidden: bool,
     vote_count: Option<i64>,
 }
 

@@ -1462,6 +1462,7 @@ dependencies = [
  "rstml-to-string-macro",
  "serde",
  "sqlx",
+ "thiserror",
  "tokio",
  "tower-http",
  "tracing",
