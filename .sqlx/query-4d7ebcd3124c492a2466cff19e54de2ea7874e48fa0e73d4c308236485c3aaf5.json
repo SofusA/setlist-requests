@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "select * from songs",
+  "query": "update songs set hidden = true where id = $1 returning *",
   "describe": {
     "columns": [
       {
@@ -22,17 +22,25 @@
         "ordinal": 3,
         "name": "description",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "hidden",
+        "type_info": "Bool"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Int4"
+      ]
     },
     "nullable": [
       false,
       false,
       false,
-      true
+      true,
+      false
     ]
   },
-  "hash": "2db3b322a70f3c6f7d0182397f81914d76afd36cb3f1c46fd01bccb6a91b4429"
+  "hash": "4d7ebcd3124c492a2466cff19e54de2ea7874e48fa0e73d4c308236485c3aaf5"
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "with deleted_vote as (delete from votes where session_id = $1 and song_id = $2 returning song_id) select s.* from deleted_vote dv join songs s on dv.song_id = s.id",
+  "query": "update songs set hidden = false where id = $1 returning *",
   "describe": {
     "columns": [
       {
@@ -31,7 +31,6 @@
     ],
     "parameters": {
       "Left": [
-        "Text",
         "Int4"
       ]
     },
@@ -43,5 +42,5 @@
       false
     ]
   },
-  "hash": "9adde896a3336a5f32d4c20b87790fca74e043bcdb4795d2483314de4dccb52f"
+  "hash": "8ad636f7cf2d75b4d9f2a4273eb20ee2d1da07141c48d8866537f45fef205012"
 }

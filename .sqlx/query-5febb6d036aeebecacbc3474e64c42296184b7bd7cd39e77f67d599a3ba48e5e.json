@@ -22,6 +22,11 @@
         "ordinal": 3,
         "name": "description",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "hidden",
+        "type_info": "Bool"
       }
     ],
     "parameters": {
@@ -34,7 +39,8 @@
       false,
       false,
       false,
-      true
+      true,
+      false
     ]
   },
   "hash": "5febb6d036aeebecacbc3474e64c42296184b7bd7cd39e77f67d599a3ba48e5e"

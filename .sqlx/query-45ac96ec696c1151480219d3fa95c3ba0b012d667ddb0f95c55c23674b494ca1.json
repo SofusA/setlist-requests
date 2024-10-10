@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT \n            s.id, \n            s.artist, \n            s.title, \n            s.description, \n            COUNT(v.id) AS vote_count\n        FROM \n            songs s\n        LEFT JOIN \n            votes v ON s.id = v.song_id\n        GROUP BY \n            s.id\n        ",
+  "query": "\n        SELECT \n            s.id, \n            s.artist, \n            s.title, \n            s.hidden,\n            s.description,\n            COUNT(v.id) AS vote_count\n        FROM \n            songs s\n        LEFT JOIN \n            votes v ON s.id = v.song_id\n        GROUP BY \n            s.id\n        ",
   "describe": {
     "columns": [
       {
@@ -20,11 +20,16 @@
       },
       {
         "ordinal": 3,
+        "name": "hidden",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
         "name": "description",
         "type_info": "Text"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "vote_count",
         "type_info": "Int8"
       }
@@ -36,9 +41,10 @@
       false,
       false,
       false,
+      false,
       true,
       null
     ]
   },
-  "hash": "9e1de8d650749652611552f18af48daee72f7be853b588ab3a64fc4bf8c89ed1"
+  "hash": "45ac96ec696c1151480219d3fa95c3ba0b012d667ddb0f95c55c23674b494ca1"
 }
