@@ -24,7 +24,7 @@ pub fn page(component: View, title: &str) -> View {
                     <a href="https://www.festorkestret.dk/">
                         <img class="w-60 p-2" src="https://www.festorkestret.dk/wp-content/uploads/2018/06/FO-font-white.png" />
                     </a>
-                    Setlist
+                    Setliste
                 </nav>
 
                 <div class="flex w-full justify-center p-4">

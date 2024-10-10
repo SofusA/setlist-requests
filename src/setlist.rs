@@ -67,7 +67,7 @@ fn song_card(song: Song) -> View {
                     {if song.hidden {
                         html! {
                             <button
-                                title="Unhide song"
+                                title="Vis sang"
                                 hx-put=format!("/setlist/{}/unhide", song.id)
                                 hx-target=format!("#song-{}", song.id)
                                 hx-swap="outerHTML"
@@ -78,7 +78,7 @@ fn song_card(song: Song) -> View {
                     } else {
                         html! {
                             <button
-                                title="Hide song"
+                                title="Skjul sang"
                                 hx-put=format!("/setlist/{}/hide", song.id)
                                 hx-target=format!("#song-{}", song.id)
                                 hx-swap="outerHTML"
@@ -128,7 +128,7 @@ pub async fn setlist_page(State(state): State<Arc<AppState>>) -> View {
                 hx-swap="none"
                 class="flex gap-3 justify-center p-4 max-w-lg rounded-lg border shadow transition-colors dark:border-neutral-700 dark:bg-neutral-950"
             >
-                <p>Clear votes</p>
+                <p>Slet alle stemmer</p>
                 <p class="text-red-500">{icons::trash_2()}</p>
             </button>
             {songs}
