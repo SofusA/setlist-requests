@@ -107,7 +107,7 @@ async fn create_router() -> Router {
 async fn index() -> View {
     let index = html! {
         <div class="flex flex-col gap-4">
-            <h1 class="text-lg">Stem på hvilke sange FestOrkestret spiller efter pausen</h1>
+            <h1 class="text-lg">Stem på hvilke sange FestOrkestret skal spille</h1>
 
             <a
                 class="p-2 text-lg text-center text-white bg-blue-500 rounded transition-colors hover:bg-blue-400"
