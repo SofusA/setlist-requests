@@ -23,10 +23,16 @@ impl Default for View {
 impl axum::response::IntoResponse for View {
     fn into_response(self) -> axum::response::Response {
         (
-            [(
-                axum::http::header::CONTENT_TYPE,
-                axum::http::HeaderValue::from_static(mime::TEXT_HTML_UTF_8.as_ref()),
-            )],
+            [
+                (
+                    axum::http::header::CONTENT_TYPE,
+                    axum::http::HeaderValue::from_static(mime::TEXT_HTML_UTF_8.as_ref()),
+                ),
+                (
+                    axum::http::header::CACHE_CONTROL,
+                    axum::http::HeaderValue::from_static("no-cache"),
+                ),
+            ],
             self.0,
         )
             .into_response()

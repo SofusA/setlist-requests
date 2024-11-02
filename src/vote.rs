@@ -141,8 +141,8 @@ fn song_card(voted_for: bool, song: Song) -> View {
                 if voted_for { "border-blue-500" } else { "dark:border-neutral-700" },
             )
         >
-            <div class="flex flex-wrap gap-2 justify-between items-center w-full">
-                <h2 class="text-2xl font-semibold">{song.title}</h2>
+            <div class="flex gap-2 justify-between items-start w-full">
+                <h2 class="text-2xl font-semibold text-left">{song.title}</h2>
                 <span class=if voted_for {
                     "text-blue-500"
                 } else {
@@ -152,7 +152,7 @@ fn song_card(voted_for: bool, song: Song) -> View {
 
             <h4 class="text-sm text-neutral-500">{song.artist}</h4>
             {if let Some(description) = song.description {
-                html! { <p class="pt-2">{description}</p> }
+                html! { <p class="pt-2 text-left">{description}</p> }
             } else {
                 Default::default()
             }}
