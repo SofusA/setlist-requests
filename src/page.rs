@@ -1,7 +1,7 @@
 use crate::{html, view::View};
 
 pub fn page(component: View, title: &str) -> View {
-    let style_url = "/assets/styles.css?version=13";
+    let style_url = "/assets/styles.css?version=14";
     let doctype = "<!DOCTYPE html>";
 
     html! {

@@ -21,9 +21,9 @@ async fn vote_results(database: &Database) -> View {
         .map(|vote| {
             html! {
                 <tr class="odd:bg-gray-50 odd:dark:bg-neutral-950">
-                    <td class="py-3 px-6">{&vote.song.title}</td>
-                    <td class="py-3 px-6">{&vote.song.artist}</td>
-                    <td class="py-3 px-6">{&vote.vote_count}</td>
+                    <td style="word-break: break-word" class="py-3 px-6">{&vote.song.title}</td>
+                    <td style="word-break: break-word" class="py-3 px-6">{&vote.song.artist}</td>
+                    <td style="word-break: break-word" class="py-3 px-6">{&vote.vote_count}</td>
                 </tr>
             }
         })
