@@ -67,7 +67,6 @@ pub async fn vote_songs(
             <div class="absolute w-full h-4 bg-inherit"></div>
         </div>
     };
-    // </div>
 
     let song_container = html! { <div class="flex flex-col gap-4 w-full max-w-lg">{songs}</div> };
 

@@ -26,6 +26,7 @@ fn page_inner(component: View, before: View, title: &str) -> View {
             <body
                 class="text-black bg-white dark:text-white dark:bg-neutral-900"
                 hx-history="false"
+                hx-boost="true"
             >
 
                 <div class="sticky top-0 flex bg-inherit flex-col">
