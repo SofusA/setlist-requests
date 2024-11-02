@@ -1,6 +1,6 @@
 use crate::{
-    app::AppState, database::Song, errors::BadRequestError, html, icons, page::page, view::View,
-    vote_results::votes_updated,
+    app::AppState, database::Song, errors::BadRequestError, html, icons,
+    page::page_with_view_before, view::View, vote_results::votes_updated,
 };
 use axum::{
     extract::{Path, State},
@@ -42,30 +42,40 @@ pub async fn vote_songs(
 
     let current_votes = state.database.count_votes(session_id).await.unwrap();
 
-    let song_container = html! {
-        <div class="flex flex-col gap-3 w-full max-w-lg">
-            <div>
-                <span id="current_votes">{current_votes}</span>
-                {"&nbsp;"}
-                <span>ud af</span>
-                {"&nbsp;"}
-                <span>{MAX_VOTES}</span>
-                {"&nbsp;"}
-                <span>stemmer</span>
+    let sticky_info = html! {
+        <div class="relative bg-inherit">
+            <div class="flex justify-center px-4 pt-4 w-full">
+                <div class="grid grid-cols-2 gap-4 w-full max-w-lg">
+                    <div class="flex justify-center py-2 px-3 rounded-lg border shadow border-neutral-700">
+                        <span id="current_votes">{current_votes}</span>
+                        {"&nbsp;"}
+                        <span>ud af</span>
+                        {"&nbsp;"}
+                        <span>{MAX_VOTES}</span>
+                        {"&nbsp;"}
+                        <span>stemmer</span>
+                    </div>
+                    <a
+                        href="/"
+                        class="flex justify-center py-2 px-3 text-white bg-blue-500 rounded hover:bg-blue-400"
+                    >
+                        Afslut
+                    </a>
+                </div>
             </div>
-
-            <div class="flex flex-col gap-3">{songs}</div>
-
-            <a
-                href="/"
-                class="flex justify-center py-2 px-3 text-white bg-blue-500 rounded hover:bg-blue-400"
-            >
-                Afslut
-            </a>
+            // spacing element which overlays song cards
+            <div class="absolute w-full h-4 bg-inherit"></div>
         </div>
     };
+    // </div>
 
-    Ok(page(song_container, "Setlist"))
+    let song_container = html! { <div class="flex flex-col gap-4 w-full max-w-lg">{songs}</div> };
+
+    Ok(page_with_view_before(
+        song_container,
+        sticky_info,
+        "Setlist",
+    ))
 }
 
 pub async fn vote_for_song(

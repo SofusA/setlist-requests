@@ -1,6 +1,14 @@
 use crate::{html, view::View};
 
 pub fn page(component: View, title: &str) -> View {
+    page_inner(component, View::default(), title)
+}
+
+pub fn page_with_view_before(component: View, before: View, title: &str) -> View {
+    page_inner(component, before, title)
+}
+
+fn page_inner(component: View, before: View, title: &str) -> View {
     let style_url = "/assets/styles.css?version=14";
     let doctype = "<!DOCTYPE html>";
 
@@ -20,12 +28,16 @@ pub fn page(component: View, title: &str) -> View {
                 hx-history="false"
             >
 
-                <nav class="w-full text-xl px-3 py-2 sticky top-0 bg-slate-800 flex gap-3 items-center">
-                    <a href="https://www.festorkestret.dk/">
-                        <img class="w-60 p-2" src="https://www.festorkestret.dk/wp-content/uploads/2018/06/FO-font-white.png" />
-                    </a>
-                    Setliste
-                </nav>
+                <div class="sticky top-0 flex bg-inherit flex-col">
+                    <nav class="w-full text-xl px-3 py-2 bg-slate-800 flex gap-3 items-center">
+                        <a href="https://www.festorkestret.dk/">
+                            <img class="w-60 p-2" src="https://www.festorkestret.dk/wp-content/uploads/2018/06/FO-font-white.png" />
+                        </a>
+                        Setliste
+                    </nav>
+                    {before}
+                </div>
+
 
                 <div class="flex w-full justify-center p-4">
                     {component}
