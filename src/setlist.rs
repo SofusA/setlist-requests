@@ -1,4 +1,6 @@
-use crate::{app::AppState, database::Song, html, icons, page::page, view::View};
+use crate::{
+    app::AppState, database::Song, html, icons, page::page, view::View, vote_results::votes_updated,
+};
 use axum::{
     extract::{Path, State},
     Form,
@@ -109,6 +111,8 @@ fn song_card(song: Song) -> View {
 
 pub async fn clear_votes(State(state): State<Arc<AppState>>) {
     state.database.clear_votes().await.unwrap();
+
+    votes_updated(&state.tx, &state.database).await;
 }
 
 pub async fn setlist_page(State(state): State<Arc<AppState>>) -> View {

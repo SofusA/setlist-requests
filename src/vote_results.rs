@@ -58,7 +58,7 @@ pub async fn vote_result_page(State(state): State<Arc<AppState>>) -> View {
     page(
         html! {
             {vote_results}
-            <script src="/assets/scripts/vote-updates.js?version=1"></script>
+            <script src="/assets/scripts/vote-updates.js?version=3"></script>
         },
         "Vote results",
     )
